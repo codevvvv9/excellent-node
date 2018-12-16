@@ -1,31 +1,62 @@
 const http = require('http');
+// 解析url中？之后的键值对
+const qs = require('querystring');
 
-// let count = 0;
-
-// const server = http.createServer((request, response) => {
-//   response.end(`hello. you are No. ${count += 1} User`);
-// });
 const server = http.createServer();
 server.on('request', (request, response) => {
-  // response.end(`hello, you are No.${count += 1} User`);
   // console.log(request.method);
-  console.log(request.headers);
-  const contentType = request.headers['content-type']
+  const url = request.url;
+  console.log(url);
+  const contentType = request.headers['content-type'];
+  let str = '';
   switch (contentType) {
-    case 'text/plain':
-      let str = '';
+    case 'text/plain': {
+      response.setHeader('Content-Type', 'text/plain');
       request.on('data', (data) => {
-        console.log(1);
         str += data.toString('utf-8');
       });
       request.on('end', () => {
-        console.log(2);
-        response.end(`you send a text: ${str}`);
+        response.statusCode = 200;
+        response.end(JSON.stringify({ result: `you sent plain text: ${str}` }));
       });
-      console.log(3);
       break;
-    case 'application/json':
-      response.end('you send a json');
+    }
+    case 'application/json': {
+      response.setHeader('Content-Type', 'application/json');
+      request.on('data', (data) => {
+        str += data.toString('utf-8');
+      });
+      request.on('end', () => {
+        let jsonReqBody;
+        try {
+          console.log(4);
+          jsonReqBody = JSON.parse(str);
+          console.log(jsonReqBody);
+        } catch (e) {
+          response.statusCode = 400;
+          response.end(JSON.stringify({ err: 'you sent a bad request' }));
+        }
+        response.end(JSON.stringify(jsonReqBody));
+      });
+      break;
+    }
+    case 'application/x-www-form-urlencoded': {
+      response.setHeader('Content-Type', 'text/plain');
+      request.on('data', (data) => {
+        str += data.toString('utf-8');
+      });
+      request.on('end', () => {
+        const requestBody = qs.parse(str);
+        console.log(requestBody);
+        response.end(str);
+      });
+      break;
+    }
+    case 'multipart/form-data':
+      request.on('data', (data) => {
+        str += data.toString();
+      });
+      response.end('you send a file');
       break;
     default:
       response.end('you send a illegal message');
