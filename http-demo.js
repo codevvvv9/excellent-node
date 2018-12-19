@@ -18,30 +18,30 @@ const server = http.createServer();
 const parseUrl = (request, response) => {
   const { requestUrl } = { requestUrl: url.parse(request.url, true) };
   const { method } = { method: request.method };
-  let userName;
-  let user;
-  let requestData;
+  let userName = '';
+  let user = '';
+  let requestData = '';
   switch (requestUrl.pathname) {
     case '/user':
       switch (method) {
         case 'GET':
-          userName = requestUrl.query.name;
+          userName = requestUrl.query.name ? requestUrl.query.name : '';
           user = users.find(userItem => userItem.name === userName);
-          response.end(JSON.parse(user));
+          response.end(JSON.stringify(user));
           break;
         case 'POST':
           request.on('data', (data) => {
             requestData += data.toString('utf-8');
           });
           request.on('end', () => {
-            let user;
+            let userStr;
             try {
-              user = JSON.parse(requestData);
+              userStr = JSON.parse(requestData);
             } catch (e) {
               response.statusCode = 400;
               response.end(JSON.stringify({ err: 'you sent a bad request' }));
             }
-            users.push(user);
+            users.push(userStr);
             response.end(JSON.stringify({
               status: 'succeed',
             }));
@@ -59,58 +59,6 @@ const parseUrl = (request, response) => {
 };
 
 server.on('request', (request, response) => {
-  // console.log(request.method);
   parseUrl(request, response);
-  // const contentType = request.headers['content-type'];
-  // let str = '';
-  // switch (contentType) {
-  //   case 'text/plain': {
-  //     response.setHeader('Content-Type', 'text/plain');
-  //     request.on('data', (data) => {
-  //       requestData += data.toString('utf-8');
-  //     });
-  //     request.on('end', () => {
-  //       response.statusCode = 200;
-  //       response.end(JSON.stringify({ result: `you sent plain text: ${requestData}` }));
-  //     });
-  //     break;
-  //   }
-  //   case 'application/json': {
-  //     response.setHeader('Content-Type', 'application/json');
-  //     request.on('data', (data) => {
-  //       requestData += data.toString('utf-8');
-  //     });
-  //     request.on('end', () => {
-  //       let jsonReqBody;
-  //       try {
-  //         jsonReqBody = JSON.parse(requestData);
-  //       } catch (e) {
-  //         response.statusCode = 400;
-  //         response.end(JSON.stringify({ err: 'you sent a bad request' }));
-  //       }
-  //       response.end(JSON.stringify(jsonReqBody));
-  //     });
-  //     break;
-  //   }
-  //   case 'application/x-www-form-urlencoded': {
-  //     response.setHeader('Content-Type', 'text/plain');
-  //     request.on('data', (data) => {
-  //       requestData += data.toString('utf-8');
-  //     });
-  //     request.on('end', () => {
-  //       response.end(requestData);
-  //     });
-  //     break;
-  //   }
-  //   case 'multipart/form-data':
-  //     request.on('data', (data) => {
-  //       requestData += data.toString();
-  //     });
-  //     response.end('you send a file');
-  //     break;
-  //   default:
-  //     response.end('you send a illegal message');
-  //     break;
-  // }
 });
 server.listen(8989);
