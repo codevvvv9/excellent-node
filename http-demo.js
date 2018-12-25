@@ -53,7 +53,9 @@ const parseUrl = (request, response) => {
       break;
     default:
       response.statusCode = 404;
-      response.end();
+      response.end(JSON.stringify({
+        status: 'not found page',
+      }));
       break;
   }
 };
