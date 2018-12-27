@@ -3,7 +3,7 @@
  * @param request
  * @param response
  */
-const parseUrl = (request, response) => {
+const parseUrl = (request, response, url, users) => {
   const { requestUrl } = { requestUrl: url.parse(request.url, true) };
   const { method } = { method: request.method };
   let userName = '';
@@ -47,5 +47,7 @@ const parseUrl = (request, response) => {
       break;
   }
 };
-
-module.exports.parseUrl = parseUrl;
+const parseObject = {
+  parseUrl,
+};
+exports.parseObject = parseObject;
