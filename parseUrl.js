@@ -1,9 +1,12 @@
+const url = require('url');
+
+const users = [];
 /**
  * 解析url
  * @param request
  * @param response
  */
-const parseUrl = (request, response, url, users) => {
+const parseUrl = (request, response) => {
   const { requestUrl } = { requestUrl: url.parse(request.url, true) };
   const { method } = { method: request.method };
   let userName = '';
@@ -15,7 +18,11 @@ const parseUrl = (request, response, url, users) => {
         case 'GET':
           userName = requestUrl.query.name ? requestUrl.query.name : '';
           user = users.find(userItem => userItem.name === userName);
-          response.end(JSON.stringify(user));
+          if (user) {
+            response.end(JSON.stringify(user));
+          } else {
+            response.end(JSON.stringify({ result: 'there isn\'t this user' }));
+          }
           break;
         case 'POST':
           request.on('data', (data) => {
@@ -47,7 +54,4 @@ const parseUrl = (request, response, url, users) => {
       break;
   }
 };
-const parseObject = {
-  parseUrl,
-};
-exports.parseObject = parseObject;
+module.exports = parseUrl;
